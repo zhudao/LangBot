@@ -1,3 +1,14 @@
+import type {
+  AlertDelivery,
+  AlertIncident,
+  AlertSettings,
+  AlertSettingsResponse,
+  AlertSummary,
+} from '@/app/infra/entities/alerts';
+import type {
+  WorkspaceSandboxSettings,
+  E2BConfigInput,
+} from '@/app/infra/entities/workspace';
 import { BaseHttpClient, type RequestConfig } from './BaseHttpClient';
 import { notifyAfterModelConfigurationChange } from './modelConfigEvents';
 import type {
@@ -128,6 +139,41 @@ import type {
  * 负责与后端 API 的所有交互
  */
 export class BackendClient extends BaseHttpClient {
+  public getWorkspaceSandbox(
+    refresh = false,
+  ): Promise<WorkspaceSandboxSettings> {
+    return this.get(
+      `/api/v1/workspaces/current/sandbox${refresh ? '?refresh=true' : ''}`,
+    );
+  }
+
+  public setWorkspaceSandbox(
+    backend: string,
+    e2b?: E2BConfigInput,
+    limits?: import('@/app/infra/entities/workspace').WorkspaceLimits,
+  ): Promise<WorkspaceSandboxSettings> {
+    return this.put('/api/v1/workspaces/current/sandbox', {
+      backend,
+      ...(e2b ? { e2b } : {}),
+      ...(limits ? { limits } : {}),
+    });
+  }
+
+  public checkWorkspaceSandbox(
+    e2b?: E2BConfigInput,
+  ): Promise<WorkspaceSandboxSettings> {
+    return this.post(
+      '/api/v1/workspaces/current/sandbox/check',
+      e2b ? { e2b } : {},
+    );
+  }
+
+  public testWorkspaceSandbox(
+    e2b: E2BConfigInput,
+  ): Promise<WorkspaceSandboxSettings> {
+    return this.post('/api/v1/workspaces/current/sandbox/test', { e2b });
+  }
+
   public getWorkspaceLanguage(): Promise<{
     language: string;
     supported_languages: string[];
@@ -2069,6 +2115,34 @@ export class BackendClient extends BaseHttpClient {
   }
 
   // ============ Workspace governance / operation traceability ============
+
+  public getAlertSettings(): Promise<AlertSettingsResponse> {
+    return this.get('/api/v1/alerts/settings');
+  }
+
+  public updateAlertSettings(
+    settings: AlertSettings,
+  ): Promise<{ settings: AlertSettings }> {
+    return this.put('/api/v1/alerts/settings', settings);
+  }
+
+  public getAlertSummary(): Promise<AlertSummary> {
+    return this.get('/api/v1/alerts/summary');
+  }
+
+  public getAlertIncidents(
+    state?: 'firing' | 'resolved',
+  ): Promise<{ incidents: AlertIncident[] }> {
+    return this.get('/api/v1/alerts/incidents', state ? { state } : undefined);
+  }
+
+  public getAlertDeliveries(): Promise<{ deliveries: AlertDelivery[] }> {
+    return this.get('/api/v1/alerts/deliveries');
+  }
+
+  public sendTestAlert(): Promise<{ deliveries: AlertDelivery[] }> {
+    return this.post('/api/v1/alerts/test', {});
+  }
 
   public getOperationGovernance(): Promise<OperationGovernance> {
     return this.get('/api/v1/settings/governance');

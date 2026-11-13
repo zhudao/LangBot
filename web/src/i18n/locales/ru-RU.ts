@@ -118,6 +118,91 @@ const ruRU = {
       managed_sandbox_sessions: 'Управляемые сеансы песочницы',
     },
   },
+  workspaceSandbox: {
+    quotaCheck: 'Квота диска проверяется до и после команд, а не непрерывно.',
+    testRun: 'Пробный запуск',
+    testRunCost:
+      'Создаёт временную песочницу, занимает один слот и может потребовать оплаты.',
+    checkHint:
+      'Проверка и сохранение не создают песочниц. Пробный запуск необязателен.',
+    queryUnsupported:
+      'Сервис не поддерживает запрос шаблона; он не проверен. Можно сохранить или запустить тест.',
+    limitsTitle: 'Лимиты пространства',
+    limitsHelp:
+      'Пустые поля наследуют настройки сервера. Изменения действуют для новых задач.',
+    inherit: 'Наследовать',
+    limitMax: 'Максимум: {{value}}',
+    limitUnsupported: 'Не поддерживается средой или политикой',
+    e2bLimitUnsupported:
+      'Управляется шаблоном или сервисом E2B; настройка недоступна',
+    invalidLimits: 'Введите значения в указанных пределах',
+
+    confirm: 'Подтвердить и сохранить',
+    cancel: 'Отмена',
+    current: 'Активно: {{backend}}',
+    unsaved: 'Не сохранено',
+    configureE2b: 'Настроить E2B',
+    apiUrl: 'URL API',
+    sandboxUrl: 'URL песочницы',
+    template: 'Шаблон',
+    keyConfigured: 'Настроено; оставьте пустым для сохранения',
+    keyRequired: 'Введите API Key',
+    keyHelp:
+      'Сохранённые ключи не возвращаются. При изменении URL введите новый ключ.',
+    noManagedProcesses: 'Эта среда не поддерживает серверы MCP stdio.',
+    label: 'Среда выполнения',
+    description:
+      'Новые задачи используют эту среду. Запущенные задачи продолжают работу в прежней среде.',
+    saved: 'Сохранено для новых задач',
+    saveFailed: 'Не удалось сохранить среду',
+    loadFailed: 'Не удалось проверить среды',
+    refresh: 'Проверить снова',
+    noEnvironment: 'Нет доступных сред',
+    unavailable: 'Выбранная среда недоступна для выполнения новых задач.',
+    templateVerified:
+      'Template verified: temporary sandbox created, executed and deleted',
+    limitLabels: {
+      timeout_sec: 'Тайм-аут команды (сек.)',
+      idle_ttl_sec: 'Очистка при простое (сек.)',
+      max_sessions: 'Максимум песочниц',
+      cpus: 'Ядра CPU',
+      memory_mb: 'Память (MiB)',
+      pids_limit: 'Лимит процессов',
+      workspace_quota_mb: 'Квота диска (MiB)',
+    },
+    reasons: {
+      resource_not_found: 'Requested service resource not found',
+      rate_limited: 'Too many requests; retry later',
+      template_not_found: 'Template not found or not visible to this account',
+      template_query_failed: 'Template query failed; check service status',
+      template_not_ready: 'Template build is not ready',
+      network_error: 'Cannot reach service; check URLs and network',
+      capacity_limited:
+        'Service capacity exhausted or rate limited; retry later',
+      permission_denied: 'Permission denied for the supplied credentials',
+      template_creation_failed:
+        'Sandbox creation failed; check template status and service capacity',
+      template_execution_failed: 'Sandbox created but execution check failed',
+      template_cleanup_failed:
+        'Temporary sandbox cleanup failed; check E2B service',
+
+      environment_unavailable: 'Недоступно',
+      policy_restricted: 'Ограничено платформой',
+      probe_failed: 'Ошибка проверки',
+      docker_missing: 'Docker CLI не установлен',
+      docker_unreachable: 'Docker остановлен или нет доступа',
+      nsjail_missing: 'nsjail не установлен',
+      cgroup_unavailable: 'Ограничения cgroup nsjail не готовы',
+      isolation_unavailable: 'Ошибка изоляции nsjail',
+      sdk_missing: 'E2B SDK не установлен',
+      missing_credentials: 'Не задан ключ API E2B',
+      connection_failed: 'Нет соединения с E2B; проверьте URL и сеть',
+      authentication_failed: 'Ошибка авторизации E2B; проверьте ключ',
+      probe_timeout: 'Истекло время проверки',
+      invalid_configuration: 'URL или учётные данные E2B не заполнены',
+      not_checked: 'Настройки изменены; проверьте снова',
+    },
+  },
   workspaceLanguage: {
     label: 'Язык рабочего пространства',
     description:
@@ -3438,6 +3523,7 @@ const ruRU = {
     nav: {
       workspace: 'Workspace',
       operationTrace: 'Журнал',
+      alerts: 'Оповещения',
       models: 'Модели',
       api: 'API',
       storage: 'Хранилище',
@@ -4092,6 +4178,108 @@ const ruRU = {
     collapseDomain: 'Свернуть',
     ungrantableRemoved:
       'Некоторые операции не выбраны или удалены из-за недостатка прав.',
+  },
+  alerts: {
+    enableHint: 'Включить оповещения',
+    cta: {
+      title:
+        'Войдите с аккаунтом LangBot, чтобы бесплатно отправлять оповещения на почту',
+      pointFree: 'Бесплатная официальная отправка, 20 писем в день',
+      pointNoSetup: 'Не нужно настраивать SMTP или Resend',
+      pointPrivate: 'Только на адрес вашего аккаунта LangBot',
+      selfHosted: 'Хотите свой почтовый сервер?',
+      selfHostedLink: 'Настройте SMTP или Resend в config.yaml →',
+    },
+    title: 'Оповещения',
+    description:
+      'Уведомления по почте и через webhook, когда боты, Pipeline или модели постоянно дают сбои',
+    enabled: 'Оповещения включены',
+    firingCount: 'Активных: {{count}}',
+    allClear: 'Всё в порядке',
+    sendTest: 'Отправить тест',
+    saveBeforeTest: 'Сохраните изменения перед отправкой теста',
+    saved: 'Настройки оповещений сохранены',
+    saveFailed: 'Не удалось сохранить настройки: {{error}}',
+    loadFailed: 'Не удалось загрузить оповещения: {{error}}',
+    testSent: 'Тестовое оповещение отправлено, получателей: {{count}}',
+    testPartial: 'Тест отправлен с ошибками; см. журнал отправки',
+    testNoChannel: 'Каналы не настроены; выберите почтовый канал или webhook',
+    testFailed: 'Не удалось отправить тестовое оповещение: {{error}}',
+    disabledInstanceWide:
+      'Оповещения отключены для этого экземпляра (alerts.enabled в config.yaml).',
+    emailTitle: 'Почта',
+    emailDescription: 'Сейчас отправляется через: {{channel}}',
+    recipients: 'Получатели (владельцы и администраторы Workspace)',
+    noRecipients: 'Ни у одного владельца или администратора нет адреса почты.',
+    extraRecipients:
+      'Дополнительные получатели (только ваш почтовый сервис, до 10)',
+    spaceRecipientsHint:
+      'LangBot Space отправляет письма только администраторам, вошедшим через LangBot Space, на их собственный адрес Space. Бесплатная квота: 20 в день и 200 в месяц на аккаунт.',
+    channel: {
+      auto: 'Автоматически',
+      autoDescription:
+        'Ваш почтовый сервис, если он настроен, иначе LangBot Space',
+      instance: 'Ваш почтовый сервис',
+      instanceConfigured: '{{provider}} настроен в config.yaml',
+      instanceMissing:
+        'Не настроен. Задайте раздел email (SMTP или Resend) в config.yaml',
+      space: 'LangBot Space (официально)',
+      spaceAvailable: 'Бесплатная официальная отправка на {{accounts}}',
+      spaceMissing: 'Войдите с аккаунтом LangBot Space, чтобы использовать',
+      off: 'Выключено',
+      offDescription: 'Только показывать здесь и отправлять webhook',
+      none: 'не отправляется (нет доступного канала)',
+      ready: 'Готово',
+      unavailable: 'Недоступно',
+    },
+    rulesTitle: 'Правила',
+    rulesDescription:
+      'Оповещение открывается, когда число сбоев за окно достигает порога.',
+    minutesWithin: 'мин, не менее',
+    failuresOrMore: 'сбоев',
+    notifyResolved: 'Уведомлять о восстановлении',
+    throttleHint:
+      'Каждое оповещение отправляется один раз при открытии, затем напоминание через 6 ч, 12 ч и далее каждые 24 ч, пока сбои продолжаются.',
+    rule: {
+      pipeline_failures: 'Сбои Pipeline',
+      pipeline_failuresDescription: 'Ошибки обработки в одном Pipeline',
+      model_failures: 'Сбои вызовов модели',
+      model_failuresDescription: 'Неудачные запросы к одной модели',
+      bot_offline: 'Бот остановился с ошибкой',
+      bot_offlineDescription:
+        'Оповещает сразу; восстанавливается при повторном запуске бота',
+    },
+    webhooksTitle: 'Webhook',
+    webhooksDescription:
+      'Выбранные webhook получают события alert.fired, alert.reminder и alert.resolved.',
+    noWebhooks: 'Webhook пока нет. Добавьте его в Настройки → API.',
+    webhookDisabled: 'Отключён',
+    incidentsTitle: 'Последние оповещения',
+    noIncidents: 'Оповещений пока нет.',
+    incidentMeta: 'Сбоев: {{count}} · открыто {{time}}',
+    state: {
+      firing: 'Активно',
+      resolved: 'Восстановлено',
+    },
+    deliveriesTitle: 'Журнал отправки',
+    noDeliveries: 'Ещё ничего не отправлено.',
+    kind: {
+      fired: 'Оповещение',
+      reminder: 'Напоминание',
+      resolved: 'Восстановление',
+      test: 'Тест',
+    },
+    via: {
+      email: 'Почта',
+      space: 'LangBot Space',
+      webhook: 'Webhook',
+    },
+    status: {
+      sent: 'Отправлено',
+      failed: 'Ошибка',
+      rate_limited: 'Квота исчерпана',
+      skipped: 'Пропущено',
+    },
   },
 };
 export default ruRU;

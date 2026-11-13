@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import asyncio
 import datetime
 import types
@@ -135,6 +136,10 @@ class FakeApplication:
     def __init__(self, plugin_connector: FakePluginConnector, db_engine: AsyncEngine):
         self.logger = FakeLogger()
         self.ver_mgr = FakeVersionManager()
+        self.box_service = types.SimpleNamespace(
+            resolve_workspace_backend=AsyncMock(return_value=None),
+            resolve_workspace_selection=AsyncMock(return_value={'backend': None, 'e2b': {}}),
+        )
         self.plugin_connector = plugin_connector
         self.persistence_mgr = FakePersistenceManager(db_engine)
 
@@ -605,11 +610,11 @@ async def test_orchestrator_persists_run_ledger(clean_agent_state):
             {
                 'type': 'message.completed',
                 'data': {'message': {'role': 'assistant', 'content': 'fake response'}},
+                'usage': {'prompt_tokens': 1, 'completion_tokens': 1, 'total_tokens': 2},
             },
             {
                 'type': 'run.completed',
                 'data': {'finish_reason': 'stop'},
-                'usage': {'prompt_tokens': 2, 'completion_tokens': 3, 'total_tokens': 5},
             },
         ]
     )
@@ -628,9 +633,9 @@ async def test_orchestrator_persists_run_ledger(clean_agent_state):
     assert run['event_id'] == plugin_connector.contexts[0]['event']['event_id']
     assert run['runner_id'] == RUNNER_ID
     assert run['usage'] == {
-        'prompt_tokens': 2,
-        'completion_tokens': 3,
-        'total_tokens': 5,
+        'prompt_tokens': 1,
+        'completion_tokens': 1,
+        'total_tokens': 2,
     }
 
     events, next_cursor, prev_cursor, has_more = await store.page_run_events(
@@ -1052,7 +1057,10 @@ async def test_unconsumed_steering_audit_does_not_persist_pinned_context(clean_a
         attachments = query.variables.get('_pipeline_mcp_resource_attachments', [])
         return pinned_context if attachments else ''
 
-    mcp_loader = types.SimpleNamespace(build_resource_context_for_query=AsyncMock(side_effect=build_resource_context))
+    mcp_loader = types.SimpleNamespace(
+        task_sandbox_scope=lambda *_, **__: contextlib.nullcontext(),
+        build_resource_context_for_query=AsyncMock(side_effect=build_resource_context),
+    )
     ap.tool_mgr = types.SimpleNamespace(mcp_tool_loader=mcp_loader)
     orchestrator = AgentRunOrchestrator(ap, FakeRegistry(descriptor))
 
@@ -1096,7 +1104,7 @@ async def test_unconsumed_steering_audit_does_not_persist_pinned_context(clean_a
         event
         for event in event_logs
         if event['event_type'] == 'message.received'
-        and event.get('metadata', {}).get('steering', {}).get('status') == 'queued'
+        and event.get('metadata', {}).get('steering', {}).get('status') == 'dropped'
     )
 
     assert dropped['input_summary'] == 'Unconsumed steering input dropped'
@@ -1134,6 +1142,7 @@ async def test_platform_event_steering_requires_waiting_run_and_matching_binding
     sessions = types.SimpleNamespace(
         find_steering_target=AsyncMock(return_value=target_run_id),
         enqueue_steering=AsyncMock(return_value=True),
+        complete_steering_enqueue=AsyncMock(return_value=True),
     )
     journal = types.SimpleNamespace(write_event_log=AsyncMock(return_value='log-1'), write_user_transcript=AsyncMock())
     orchestrator = types.SimpleNamespace(
@@ -1144,6 +1153,7 @@ async def test_platform_event_steering_requires_waiting_run_and_matching_binding
         journal=journal,
         ap=types.SimpleNamespace(logger=FakeLogger()),
     )
+    orchestrator._enqueue_steering = lambda *args: AgentRunOrchestrator._enqueue_steering(orchestrator, *args)
 
     claimed = await AgentRunOrchestrator.try_claim_steering_from_event(
         orchestrator,
@@ -1204,6 +1214,8 @@ class TestQueryEntrySessionQueryId:
         from langbot.pkg.box.service import BoxService
 
         class CapturingBoxService:
+            resolve_workspace_backend = AsyncMock(return_value=None)
+            resolve_workspace_selection = AsyncMock(return_value={'backend': None, 'e2b': {}})
             available = True
 
             def __init__(self):
@@ -1322,7 +1334,8 @@ class TestQueryEntrySessionQueryId:
             return 'Pinned documentation'
 
         mcp_loader = types.SimpleNamespace(
-            build_resource_context_for_query=AsyncMock(side_effect=build_resource_context)
+            task_sandbox_scope=lambda *_, **__: contextlib.nullcontext(),
+            build_resource_context_for_query=AsyncMock(side_effect=build_resource_context),
         )
         ap.tool_mgr = types.SimpleNamespace(mcp_tool_loader=mcp_loader)
         orchestrator = AgentRunOrchestrator(ap, FakeRegistry(descriptor))
@@ -1956,7 +1969,8 @@ class TestQueryEntryAdapterHostCapabilities:
         )
         ap = FakeApplication(plugin_connector, db_engine)
         mcp_loader = types.SimpleNamespace(
-            build_resource_context_for_query=AsyncMock(return_value='Pinned documentation')
+            task_sandbox_scope=lambda *_, **__: contextlib.nullcontext(),
+            build_resource_context_for_query=AsyncMock(return_value='Pinned documentation'),
         )
         ap.tool_mgr = types.SimpleNamespace(mcp_tool_loader=mcp_loader)
         orchestrator = AgentRunOrchestrator(ap, FakeRegistry(descriptor))
@@ -2036,7 +2050,8 @@ async def test_synthetic_event_query_exposes_trusted_workspace_to_tools(clean_ag
     assert synthetic.workspace_uuid == context.workspace_uuid
     assert synthetic.instance_uuid == context.instance_uuid
     assert synthetic.placement_generation == context.placement_generation
-    assert synthetic.query_uuid == context.query_uuid
+    assert synthetic.query_uuid
+    assert synthetic._execution_context.query_uuid == synthetic.query_uuid
     received = []
     app.skill_mgr.get_skills = lambda scope: received.append(scope) or {}
     get_visible_skills(app, synthetic)
@@ -2120,3 +2135,31 @@ async def test_runner_error_after_runner_finalized_run_surfaces_the_real_error(c
 
     run = await RunLedgerStore(db_engine).get_run(plugin_connector.contexts[0]['run_id'])
     assert run['status'] == 'completed'
+
+
+@pytest.mark.asyncio
+async def test_event_without_query_identity_gets_a_task_scoped_identity(clean_agent_state, monkeypatch):
+    from dataclasses import replace
+
+    app = FakeApplication(FakePluginConnector(), clean_agent_state)
+    orchestrator = AgentRunOrchestrator(app, FakeRegistry(make_descriptor()))
+    plan = orchestrator.query_bridge.build_plan(make_query())
+    context = replace(TEST_CONTEXT, query_uuid=None)
+    contexts = []
+
+    async def capture(event, binding, bound_plugins, adapter_context):
+        contexts.append(adapter_context['_execution_context'])
+        if False:
+            yield None
+
+    monkeypatch.setattr(orchestrator, '_run', capture)
+    for _ in range(2):
+        assert [
+            item
+            async for item in orchestrator.run(
+                plan.event, plan.binding, adapter_context={'_execution_context': context}
+            )
+        ] == []
+    assert all(item.query_uuid for item in contexts)
+    assert contexts[0].query_uuid != contexts[1].query_uuid
+    assert context.query_uuid is None

@@ -119,6 +119,95 @@ const jaJP = {
       managed_sandbox_sessions: '管理サンドボックスセッション',
     },
   },
+  workspaceSandbox: {
+    quotaCheck:
+      'ディスク上限はコマンド実行前後に確認します。継続的なファイルシステム制限ではありません。',
+    testRun: 'テスト実行',
+    testRunCost:
+      '一時サンドボックスを作成し、枠を1つ使用します。料金が発生する場合があります。',
+    checkHint:
+      '確認と保存ではサンドボックスを作成しません。テスト実行は任意です。',
+    queryUnsupported:
+      'テンプレート照会に未対応のため未検証です。保存または任意のテストが可能です。',
+    limitsTitle: 'ワークスペースの上限',
+    limitsHelp:
+      '空欄はデプロイの既定値を継承します。変更は新規タスクに適用されます。',
+    inherit: '既定値を継承',
+    limitMax: '上限: {{value}}',
+    limitUnsupported: 'バックエンドまたは管理ポリシーが未対応です',
+    e2bLimitUnsupported:
+      'E2Bテンプレートまたはサービスで管理されるため設定できません',
+    invalidLimits: '表示された範囲内の値を入力してください',
+
+    confirm: '確認して保存',
+    cancel: 'キャンセル',
+    current: '現在の設定：{{backend}}',
+    unsaved: '未保存',
+    configureE2b: 'E2B を設定',
+    apiUrl: 'API URL',
+    sandboxUrl: 'サンドボックス URL',
+    template: 'テンプレート',
+    keyConfigured: '設定済み。空欄で維持',
+    keyRequired: 'API Key を入力',
+    keyHelp:
+      '保存済みのキーは表示されません。URL を変更する場合は新しいキーを入力してください。',
+    noManagedProcesses: 'この環境は stdio MCP サーバーに対応していません。',
+    label: '実行環境',
+    description:
+      'このワークスペースの新しいタスクに適用されます。実行中のタスクは元の環境を使い続けます。',
+    saved: '保存しました。新しいタスクに適用されます',
+    saveFailed: '実行環境を保存できませんでした',
+    loadFailed: '環境の確認に失敗しました',
+    refresh: '再確認',
+    noEnvironment: '利用可能な環境がありません',
+    unavailable:
+      '選択した環境は利用できません。新しいタスクはサンドボックスで実行できません。',
+    templateVerified:
+      'Template verified: temporary sandbox created, executed and deleted',
+    limitLabels: {
+      timeout_sec: 'コマンド制限時間（秒）',
+      idle_ttl_sec: 'アイドル回収（秒）',
+      max_sessions: '最大サンドボックス数',
+      cpus: 'CPUコア数',
+      memory_mb: 'メモリ（MiB）',
+      pids_limit: 'プロセス数上限',
+      workspace_quota_mb: 'ディスク上限（MiB）',
+    },
+    reasons: {
+      resource_not_found: 'Requested service resource not found',
+      rate_limited: 'Too many requests; retry later',
+      template_not_found: 'Template not found or not visible to this account',
+      template_query_failed: 'Template query failed; check service status',
+      template_not_ready: 'Template build is not ready',
+      network_error: 'Cannot reach service; check URLs and network',
+      capacity_limited:
+        'Service capacity exhausted or rate limited; retry later',
+      permission_denied: 'Permission denied for the supplied credentials',
+      template_creation_failed:
+        'Sandbox creation failed; check template status and service capacity',
+      template_execution_failed: 'Sandbox created but execution check failed',
+      template_cleanup_failed:
+        'Temporary sandbox cleanup failed; check E2B service',
+
+      environment_unavailable: '利用不可',
+      policy_restricted: 'プラットフォームにより制限',
+      probe_failed: '環境確認に失敗',
+      docker_missing: 'Docker CLI が未インストール',
+      docker_unreachable: 'Docker が停止中、またはアクセス権限がありません',
+      nsjail_missing: 'nsjail が未インストール',
+      cgroup_unavailable: 'nsjail cgroup の制限が未準備',
+      isolation_unavailable:
+        'nsjail の名前空間・マウント・ネットワーク隔離に失敗',
+      sdk_missing: 'E2B SDK が未インストール',
+      missing_credentials: 'E2B API キーが未設定',
+      connection_failed:
+        'E2B に接続できません。URL とネットワークを確認してください',
+      authentication_failed: 'E2B 認証に失敗。API キーを確認してください',
+      probe_timeout: '確認がタイムアウトしました',
+      invalid_configuration: 'E2B の URL または認証情報が不完全',
+      not_checked: '設定が変更されました。再確認してください',
+    },
+  },
   workspaceLanguage: {
     label: 'ワークスペースの言語',
     description:
@@ -3433,6 +3522,7 @@ const jaJP = {
     nav: {
       workspace: 'ワークスペース',
       operationTrace: '操作ログ',
+      alerts: 'アラート',
       models: 'モデル',
       api: 'API',
       storage: 'ストレージ',
@@ -4079,6 +4169,106 @@ const jaJP = {
     collapseDomain: '折りたたむ',
     ungrantableRemoved:
       '権限が不足しているため、一部の操作は選択されなかったか削除されました',
+  },
+  alerts: {
+    enableHint: 'アラートを有効化',
+    cta: {
+      title: 'LangBot アカウントでサインインして、アラートメールを無料で送信',
+      pointFree: '公式の無料送信、1 日 20 通まで',
+      pointNoSetup: 'SMTP や Resend の設定は不要',
+      pointPrivate: 'あなたの LangBot アカウントのアドレスにのみ送信',
+      selfHosted: '自前のメールサーバーを使いたい場合',
+      selfHostedLink: 'config.yaml で SMTP または Resend を設定 →',
+    },
+    title: 'アラート',
+    description:
+      'ボット、パイプライン、モデルが失敗し続けたときにメールと Webhook で通知します',
+    enabled: 'アラートを有効化',
+    firingCount: '{{count}} 件発生中',
+    allClear: '問題なし',
+    sendTest: 'テスト送信',
+    saveBeforeTest: 'テスト送信の前に変更を保存してください',
+    saved: 'アラート設定を保存しました',
+    saveFailed: 'アラート設定の保存に失敗しました：{{error}}',
+    loadFailed: 'アラートの読み込みに失敗しました：{{error}}',
+    testSent: 'テストアラートを {{count}} 件の宛先に送信しました',
+    testPartial: '一部の送信に失敗しました。送信履歴を確認してください',
+    testNoChannel:
+      '通知チャネルが未設定です。メールチャネルか Webhook を選択してください',
+    testFailed: 'テストアラートの送信に失敗しました：{{error}}',
+    disabledInstanceWide:
+      'このインスタンスではアラートが無効です（config.yaml の alerts.enabled）。',
+    emailTitle: 'メール',
+    emailDescription: '現在の送信方法：{{channel}}',
+    recipients: '受信者（ワークスペースのオーナーと管理者）',
+    noRecipients: 'メールアドレスを持つオーナーまたは管理者がいません。',
+    extraRecipients: '追加の受信者（自前のメールサービスのみ、最大 10 件）',
+    spaceRecipientsHint:
+      'LangBot Space は LangBot アカウントでサインインした管理者本人のアドレスにのみ送信します。無料枠：アカウントごとに 1 日 20 通、月 200 通。',
+    channel: {
+      auto: '自動',
+      autoDescription:
+        'メールサービスが設定されていればそれを、なければ LangBot Space を使用',
+      instance: '自前のメールサービス',
+      instanceConfigured: 'config.yaml で {{provider}} を設定済み',
+      instanceMissing:
+        '未設定です。config.yaml の email セクションで SMTP または Resend を設定してください',
+      space: 'LangBot Space（公式）',
+      spaceAvailable: '{{accounts}} へ無料で公式送信',
+      spaceMissing: 'LangBot アカウントでサインインすると利用できます',
+      off: 'オフ',
+      offDescription: 'ここに表示し Webhook のみ送信',
+      none: '送信しない（利用可能なチャネルなし）',
+      ready: '利用可能',
+      unavailable: '利用不可',
+    },
+    rulesTitle: 'ルール',
+    rulesDescription:
+      '時間枠内の失敗回数がしきい値に達するとアラートが発生します。',
+    minutesWithin: '分以内に',
+    failuresOrMore: '回以上の失敗',
+    notifyResolved: 'アラートの復旧時に通知',
+    throttleHint:
+      '各アラートは発生時に 1 回送信され、失敗が続く場合は 6 時間後、12 時間後、その後 24 時間ごとにリマインドされます。',
+    rule: {
+      pipeline_failures: 'パイプラインの失敗',
+      pipeline_failuresDescription: '同じパイプラインでの処理エラー',
+      model_failures: 'モデル呼び出しの失敗',
+      model_failuresDescription: '同じモデルへのリクエスト失敗',
+      bot_offline: 'ボットがエラーで停止',
+      bot_offlineDescription: '即時に通知し、ボットが再起動すると復旧',
+    },
+    webhooksTitle: 'Webhook',
+    webhooksDescription:
+      '選択した Webhook は alert.fired、alert.reminder、alert.resolved イベントを受信します。',
+    noWebhooks: 'Webhook がありません。設定 → API で追加してください。',
+    webhookDisabled: '無効',
+    incidentsTitle: '最近のアラート',
+    noIncidents: 'アラートはまだありません。',
+    incidentMeta: '{{count}} 回の失敗 · 開始 {{time}}',
+    state: {
+      firing: '発生中',
+      resolved: '復旧済み',
+    },
+    deliveriesTitle: '送信履歴',
+    noDeliveries: 'まだ何も送信されていません。',
+    kind: {
+      fired: 'アラート',
+      reminder: 'リマインド',
+      resolved: '復旧',
+      test: 'テスト',
+    },
+    via: {
+      email: 'メール',
+      space: 'LangBot Space',
+      webhook: 'Webhook',
+    },
+    status: {
+      sent: '送信済み',
+      failed: '失敗',
+      rate_limited: '上限到達',
+      skipped: 'スキップ',
+    },
   },
 };
 export default jaJP;
